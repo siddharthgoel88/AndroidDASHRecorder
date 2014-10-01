@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">AndroidDASHRecorder</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="record_button_name">Record Video</string>
+   <!--   <string name="hello_world">Hello world!</string> -->
 
 </resources>

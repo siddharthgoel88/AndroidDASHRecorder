@@ -6,7 +6,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.Button;
 
 public class MainActivity extends Activity {
 	
@@ -26,8 +27,15 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //TextView tv = (TextView) findViewById(R.id.helloId);
-        //tv.setText("Yuhu !!!");
-        dispatchTakeVideoIntent();
+        Button b = (Button) findViewById(R.id.recordButton);
+        b.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				dispatchTakeVideoIntent();
+			}
+		});
     }
+    
+    
 }
