@@ -5,10 +5,9 @@ import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
-import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
 import com.googlecode.mp4parser.authoring.tracks.CroppedTrack;
 
-import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -17,32 +16,63 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Shortens/Crops a track
+ * Splits a video into multiple clips
  */
 public class SplitVideo {
 	
-	/**
-	 * This function performs the split of the specified video into segments of specified size.
-	 * 
-	 * @param videoPath Absolute path where video is located.
-	 * @param secondsPerSegment Size (in seconds) into which we have to divide the video
-	 */
-	public void performSplit (String videoPath, int secondsPerSegment) {
-		//TODO: Write the code for it
+	private String videoPath;
+	
+	public SplitVideo(String path) {
+		videoPath = path;
 	}
 
     public static void main(String[] args) throws IOException {
-        //Movie movie = new MovieCreator().build(new RandomAccessFile("/home/sannies/suckerpunch-distantplanet_h1080p/suckerpunch-distantplanet_h1080p.mov", "r").getChannel());
-        Movie movie = MovieCreator.build("/Users/siddharthgoel/code/workspace/MP4ParserTest/video.mp4");
+    	/*
+    	 * Intentionally left the main function so that we can check the splitting stand alone.
+    	 * 
+    	SplitVideo obj = new SplitVideo("/Users/siddharthgoel/code/workspace/MP4ParserTest/video.mp4");
+    	long start1 = System.currentTimeMillis();
+    	System.out.println("Total number of segments = " + obj.split(10.0) );
+    	long start2 = System.currentTimeMillis();
+    	System.out.println("Time taken for splitting = " + (start2 - start1) + "ms");
+    	*/
+    }
+    
+    /**
+     * Splits a video into multiple clips of specified duration of seconds
+     * 
+     * @param splitDuration Duration of each clip into which we have to cut
+     * @return Number of segments created in splitting of video
+     * @throws FileNotFoundException
+     * @throws IOException
+     */
+    public int split(double splitDuration) throws FileNotFoundException, IOException {
+    	double startTime = 0.01;
+    	int segmentNumber = 1;
+    	while (performSplit(startTime, startTime + splitDuration, segmentNumber)) {
+    		segmentNumber++;
+    		startTime += splitDuration;
+    	}
+    	return segmentNumber - 1;
+    }
+
+    /**
+     * Convenience method which is called by split(double splitDuration) to perform 
+     * the splitting of video.
+     * 
+     * @param startTime Start time of the new segment video
+     * @param endTime End time of the new segment video
+     * @param segmentNumber Segment number of the video. Used in naming for the segment
+     * @return true if segment is created else false is returned
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+	private boolean performSplit(double startTime, double endTime, int segmentNumber) throws IOException, FileNotFoundException {
+        Movie movie = MovieCreator.build(videoPath);
 
         List<Track> tracks = movie.getTracks();
         movie.setTracks(new LinkedList<Track>());
         // remove all tracks we will create new tracks from the old
-
-        double startTime1 = 10;
-        double endTime1 = 20;
-        double startTime2 = 30;
-        double endTime2 = 40;
 
         boolean timeCorrected = false;
 
@@ -58,63 +88,56 @@ public class SplitVideo {
 
                     throw new RuntimeException("The startTime has already been corrected by another track with SyncSample. Not Supported.");
                 }
-                startTime1 = correctTimeToSyncSample(track, startTime1, false);
-                endTime1 = correctTimeToSyncSample(track, endTime1, true);
-                startTime2 = correctTimeToSyncSample(track, startTime2, false);
-                endTime2 = correctTimeToSyncSample(track, endTime2, true);
+                startTime = correctTimeToSyncSample(track, startTime, true);
+                endTime = correctTimeToSyncSample(track, endTime, true);
                 timeCorrected = true;
             }
         }
-
+        
+        if (startTime == endTime) 
+        	return false;
+        
         for (Track track : tracks) {
             long currentSample = 0;
             double currentTime = 0;
             double lastTime = 0;
             long startSample1 = -1;
             long endSample1 = -1;
-            long startSample2 = -1;
-            long endSample2 = -1;
 
             for (int i = 0; i < track.getSampleDurations().length; i++) {
                 long delta = track.getSampleDurations()[i];
 
 
-                if (currentTime > lastTime && currentTime <= startTime1) {
+                if (currentTime > lastTime && currentTime <= startTime) {
                     // current sample is still before the new starttime
                     startSample1 = currentSample;
                 }
-                if (currentTime > lastTime && currentTime <= endTime1) {
+                if (currentTime > lastTime && currentTime <= endTime) {
                     // current sample is after the new start time and still before the new endtime
                     endSample1 = currentSample;
                 }
-                if (currentTime > lastTime && currentTime <= startTime2) {
-                    // current sample is still before the new starttime
-                    startSample2 = currentSample;
-                }
-                if (currentTime > lastTime && currentTime <= endTime2) {
-                    // current sample is after the new start time and still before the new endtime
-                    endSample2 = currentSample;
-                }
+
                 lastTime = currentTime;
                 currentTime += (double) delta / (double) track.getTrackMetaData().getTimescale();
                 currentSample++;
             }
-            movie.addTrack(new AppendTrack(new CroppedTrack(track, startSample1, endSample1), new CroppedTrack(track, startSample2, endSample2)));
+            movie.addTrack(new CroppedTrack(track, startSample1, endSample1));
         }
-        long start1 = System.currentTimeMillis();
+//        long start1 = System.currentTimeMillis();
         Container out = new DefaultMp4Builder().build(movie);
-        long start2 = System.currentTimeMillis();
-        FileOutputStream fos = new FileOutputStream(String.format("output-%f-%f--%f-%f.mp4", startTime1, endTime1, startTime2, endTime2));
+//        long start2 = System.currentTimeMillis();
+        FileOutputStream fos = new FileOutputStream(String.format("Segment---%d.mp4", segmentNumber));
         FileChannel fc = fos.getChannel();
         out.writeContainer(fc);
 
         fc.close();
         fos.close();
-        long start3 = System.currentTimeMillis();
-        System.err.println("Building IsoFile took : " + (start2 - start1) + "ms");
-        System.err.println("Writing IsoFile took  : " + (start3 - start2) + "ms");
-        System.err.println("Writing IsoFile speed : " + (new File(String.format("output-%f-%f--%f-%f.mp4", startTime1, endTime1, startTime2, endTime2)).length() / (start3 - start2) / 1000) + "MB/s");
-    }
+//        long start3 = System.currentTimeMillis();
+//        System.err.println("Building IsoFile took : " + (start2 - start1) + "ms");
+//        System.err.println("Writing IsoFile took  : " + (start3 - start2) + "ms");
+//        System.err.println("Writing IsoFile speed : " + (new File(String.format("output-%f-%f.mp4", startTime, endTime)).length() / (start3 - start2) / 1000) + "MB/s");
+        return true;
+	}
 
 
     private static double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
@@ -145,7 +168,6 @@ public class SplitVideo {
         }
         return timeOfSyncSamples[timeOfSyncSamples.length - 1];
     }
-
 
 
 }
