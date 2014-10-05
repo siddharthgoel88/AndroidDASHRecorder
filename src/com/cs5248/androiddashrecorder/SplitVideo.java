@@ -1,5 +1,8 @@
 package com.cs5248.androiddashrecorder;
 
+import android.os.AsyncTask;
+import android.util.Log;
+
 import com.coremedia.iso.boxes.Container;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
@@ -18,41 +21,34 @@ import java.util.List;
 /**
  * Splits a video into multiple clips
  */
-public class SplitVideo {
+public class SplitVideo extends AsyncTask<String, String, Integer> {
 	
-	private String videoPath;
-	
-	public SplitVideo(String path) {
-		videoPath = path;
-	}
-
-    public static void main(String[] args) throws IOException {
-    	/*
-    	 * Intentionally left the main function so that we can check the splitting stand alone.
-    	 * 
-    	SplitVideo obj = new SplitVideo("/Users/siddharthgoel/code/workspace/MP4ParserTest/video.mp4");
-    	long start1 = System.currentTimeMillis();
-    	System.out.println("Total number of segments = " + obj.split(10.0) );
-    	long start2 = System.currentTimeMillis();
-    	System.out.println("Time taken for splitting = " + (start2 - start1) + "ms");
-    	*/
-    }
+	private static String videoPath;
+	private static String outputPath;
     
     /**
      * Splits a video into multiple clips of specified duration of seconds
      * 
+     * @param path Path of the video to be segmented
+     * @param destinationPath Path where the final segments have to be stored
      * @param splitDuration Duration of each clip into which we have to cut
      * @return Number of segments created in splitting of video
-     * @throws FileNotFoundException
-     * @throws IOException
      */
-    public int split(double splitDuration) throws FileNotFoundException, IOException {
+    public static int split(String path, String destinationPath, double splitDuration) {
     	double startTime = 0.01;
     	int segmentNumber = 1;
-    	while (performSplit(startTime, startTime + splitDuration, segmentNumber)) {
-    		segmentNumber++;
-    		startTime += splitDuration;
-    	}
+    	videoPath = path;
+    	outputPath = destinationPath;
+    	try {
+    		while (performSplit(startTime, startTime + splitDuration, segmentNumber)) {
+        		segmentNumber++;
+        		startTime += splitDuration;
+        	}
+    	} catch (FileNotFoundException e) {
+    		e.printStackTrace();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+		}
     	return segmentNumber - 1;
     }
 
@@ -67,7 +63,7 @@ public class SplitVideo {
      * @throws IOException
      * @throws FileNotFoundException
      */
-	private boolean performSplit(double startTime, double endTime, int segmentNumber) throws IOException, FileNotFoundException {
+	private static boolean performSplit(double startTime, double endTime, int segmentNumber) throws IOException, FileNotFoundException {
         Movie movie = MovieCreator.build(videoPath);
 
         List<Track> tracks = movie.getTracks();
@@ -126,7 +122,7 @@ public class SplitVideo {
 //        long start1 = System.currentTimeMillis();
         Container out = new DefaultMp4Builder().build(movie);
 //        long start2 = System.currentTimeMillis();
-        FileOutputStream fos = new FileOutputStream(String.format("Segment---%d.mp4", segmentNumber));
+        FileOutputStream fos = new FileOutputStream(outputPath + String.format("Segment---%d.mp4", segmentNumber));
         FileChannel fc = fos.getChannel();
         out.writeContainer(fc);
 
@@ -168,6 +164,24 @@ public class SplitVideo {
         }
         return timeOfSyncSamples[timeOfSyncSamples.length - 1];
     }
+
+	@Override
+	protected Integer doInBackground(String... params) {
+		
+		Log.i("DASH" , "Inside doInBackground");
+		
+		if (params.length != 3)
+			throw new IllegalArgumentException("Three parameters needed - src" +
+					" video path, dest path, split-duration");
+		
+		try {
+			Thread.sleep(5000);
+		} catch (InterruptedException e) {}
+		String path = params[0];
+		String destPath = params[1];
+		double splitDuration = Double.parseDouble(params[2]);
+		return Integer.valueOf(split(path, destPath, splitDuration));
+	}
 
 
 }

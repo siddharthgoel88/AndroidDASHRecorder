@@ -8,57 +8,84 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
 
 public class MainActivity extends Activity {
 	
-
+	//Hard coding the external storage directory due to some path issue.
+	private static final File ExternalStorageDir = new File("/storage/sdcard0/");
+	private static final String DIR_NAME = "DASHRecorder";
     static final int REQUEST_VIDEO_CAPTURE = 1;
+    private String fileName;
+    private Uri videoUri;
+    private String outputPath;
     private Intent videoIntent;
-    private static final String APP_ROOT_DIR = "DASHRecorder";
-    private Uri fileUri;
 
 	private void dispatchTakeVideoIntent() {
 	    videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-	    fileUri = getOutputMediaFileUri(); // create a file to save the video
-	    videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+	    videoUri = getOutputMediaFileUri(); // create a file to save the video
+	    videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
 	    if (videoIntent.resolveActivity(getPackageManager()) != null) {
 	        startActivityForResult(videoIntent, REQUEST_VIDEO_CAPTURE);
 	    }
 }	
 
-    /**
+    private String getSegmentFolder(String innerFolderName) {
+    	String folderName = DIR_NAME + "/segments/" + innerFolderName;
+    	
+//    	File segmentFolder = new File(Environment.getExternalStorageDirectory(), folderName);
+    	File segmentFolder = new File(ExternalStorageDir, folderName);
+		segmentFolder.mkdirs();
+		
+		return segmentFolder.getPath() + "/";
+	}
+
+	/**
      * Convenience method to generate the path where to store the video 
      * recording.
      * @return Uri where the recording is to be saved
      */
 	private Uri getOutputMediaFileUri() {
-		String foldername = APP_ROOT_DIR + "/video" ;
-		String filename = new SimpleDateFormat("dd_MM_yyyy_hh_mm_ss").format(new Date()) + ".mp4";
-		File videoFolder = new File(Environment.getExternalStorageDirectory(), foldername);
+		String folderName = DIR_NAME + "/video/" ;
+		fileName = "DASH_Video_" + new SimpleDateFormat("dd_MM_yyyy_hh_mm_ss").format(new Date());
+		String fileNameWithExt = fileName + ".mp4";
+		
+//		File videoFolder = new File(Environment.getExternalStorageDirectory(), folderName);
+		File videoFolder = new File(ExternalStorageDir, folderName);
 		videoFolder.mkdirs();
 
 		// Delete all previous files in video folder
-		for (File tmp : videoFolder.listFiles())
-			  tmp.delete();
+		//for (File tmp : videoFolder.listFiles())
+		//	  tmp.delete();
 
-		File image = new File(videoFolder, "DASH_Video_" + filename);
-		Uri uriSavedImage = Uri.fromFile(image);
+		File video = new File(videoFolder, fileNameWithExt);
+		Uri uriSavedImage = Uri.fromFile(video);
 		return uriSavedImage;
+	}
+	
+	private void segmentVideo() {
+		 //Segment the video in splits of 10 seconds   
+        outputPath = getSegmentFolder(fileName);
+        Log.i("DASH", "Output path = " + outputPath);
+        
+        SplitVideo obj = new SplitVideo();
+        Log.i("DASH", "Checking");
+        String splitDuration = "10.0";
+        
+        Log.i("DASH", "Checking 2");
+        
+        obj.execute(videoUri.getPath(), outputPath, splitDuration );
 	}
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        
         Button b = (Button) findViewById(R.id.recordButton);
         b.setOnClickListener(new View.OnClickListener() {
 			
@@ -68,6 +95,14 @@ public class MainActivity extends Activity {
 			}
 		});
         
+        Button b2 = (Button) findViewById(R.id.segmentButton);
+        b2.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				segmentVideo();
+			}
+		});
     }
     
     
