@@ -20,6 +20,8 @@ import java.util.List;
 
 /**
  * Splits a video into multiple clips
+ * This code is an adaption of ShortenExample.java
+ * from examples of MP4Parser. 
  */
 public class SplitVideo extends AsyncTask<String, String, Integer> {
 	
@@ -39,6 +41,8 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
     	int segmentNumber = 1;
     	videoPath = path;
     	outputPath = destinationPath;
+    	
+        long start1 = System.currentTimeMillis();
     	try {
     		while (performSplit(startTime, startTime + splitDuration, segmentNumber)) {
         		segmentNumber++;
@@ -49,6 +53,10 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
     	} catch (IOException e) {
     		e.printStackTrace();
 		}
+        long start2 = System.currentTimeMillis();
+        Log.i("DASH", "Total time taken to create " + Integer.toString( segmentNumber - 1) + 
+        		" segments: " + Long.toString( start2 - start1) + "ms" );
+    	
     	return segmentNumber - 1;
     }
 
@@ -119,22 +127,20 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
             }
             movie.addTrack(new CroppedTrack(track, startSample1, endSample1));
         }
-//        long start1 = System.currentTimeMillis();
+        //long start1 = System.currentTimeMillis();
         Container out = new DefaultMp4Builder().build(movie);
-//        long start2 = System.currentTimeMillis();
+        //long start2 = System.currentTimeMillis();
         FileOutputStream fos = new FileOutputStream(outputPath + String.format("Segment---%d.mp4", segmentNumber));
         FileChannel fc = fos.getChannel();
         out.writeContainer(fc);
 
         fc.close();
         fos.close();
-//        long start3 = System.currentTimeMillis();
-//        System.err.println("Building IsoFile took : " + (start2 - start1) + "ms");
-//        System.err.println("Writing IsoFile took  : " + (start3 - start2) + "ms");
-//        System.err.println("Writing IsoFile speed : " + (new File(String.format("output-%f-%f.mp4", startTime, endTime)).length() / (start3 - start2) / 1000) + "MB/s");
+        //long start3 = System.currentTimeMillis();
+        //Log.i("DASH", "Building IsoFile took : " + (start2 - start1) + "ms");
+        //Log.i("DASH", "Writing IsoFile took  : " + (start3 - start2) + "ms");
         return true;
 	}
-
 
     private static double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
         double[] timeOfSyncSamples = new double[track.getSyncSamples().length];
@@ -174,9 +180,6 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
 			throw new IllegalArgumentException("Three parameters needed - src" +
 					" video path, dest path, split-duration");
 		
-		try {
-			Thread.sleep(5000);
-		} catch (InterruptedException e) {}
 		String path = params[0];
 		String destPath = params[1];
 		double splitDuration = Double.parseDouble(params[2]);
