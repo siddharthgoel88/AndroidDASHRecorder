@@ -4,6 +4,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -81,6 +82,7 @@ public class MainActivity extends Activity {
      * recording.
      * @return Uri where the recording is to be saved
      */
+	@SuppressLint("SimpleDateFormat")
 	private Uri getOutputMediaFileUri() {
 		String folderName = DIR_NAME + "/video/" ;
 		fileName = "DASH_Video_" + new SimpleDateFormat("dd_MM_yyyy_hh_mm_ss").format(new Date());
