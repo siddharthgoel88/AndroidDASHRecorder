@@ -10,6 +10,7 @@ import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.googlecode.mp4parser.authoring.tracks.CroppedTrack;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
 	
 	private static String videoPath;
 	private static String outputPath;
+	private static String filename;
     
     /**
      * Splits a video into multiple clips of specified duration of seconds
@@ -40,8 +42,9 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
     	double startTime = 0.01;
     	int segmentNumber = 1;
     	videoPath = path;
-    	outputPath = destinationPath;
-    	
+    	outputPath = destinationPath;	
+    	filename = new File(videoPath).getName().replace(".mp4", "");
+
         long start1 = System.currentTimeMillis();
     	try {
     		while (performSplit(startTime, startTime + splitDuration, segmentNumber)) {
@@ -130,7 +133,7 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
         //long start1 = System.currentTimeMillis();
         Container out = new DefaultMp4Builder().build(movie);
         //long start2 = System.currentTimeMillis();
-        FileOutputStream fos = new FileOutputStream(outputPath + String.format("Segment---%d.mp4", segmentNumber));
+        FileOutputStream fos = new FileOutputStream(outputPath + String.format("%s---%d.mp4", filename  , segmentNumber));
         FileChannel fc = fos.getChannel();
         out.writeContainer(fc);
 
