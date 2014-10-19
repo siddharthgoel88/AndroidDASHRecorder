@@ -5,22 +5,21 @@
     tools:context="${relativePackage}.${activityClass}" >
 
     <Button
+        android:id="@+id/uploadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/recordButton"
+        android:layout_below="@+id/recordButton"
+        android:layout_marginTop="133dp"
+        android:text="@string/upload_button_name" />
+
+    <Button
         android:id="@+id/recordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="114dp"
+        android:layout_marginTop="63dp"
         android:text="@string/record_button_name" />
-
-    <Button
-        android:id="@+id/uploadButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/recordButton"
-        android:layout_alignRight="@+id/segmentButton"
-        android:layout_below="@+id/segmentButton"
-        android:layout_marginTop="49dp"
-        android:text="@string/upload_button_name" />
  
 </RelativeLayout>
