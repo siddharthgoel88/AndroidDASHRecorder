@@ -4,15 +4,16 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.FileObserver;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-
 
 public class MainActivity extends Activity {
 	
@@ -25,20 +26,52 @@ public class MainActivity extends Activity {
     private Uri videoUri;
     private String outputPath;
     private Intent videoIntent;
-
-	private void dispatchTakeVideoIntent() {
+    //Keeping FileObserver global else it will be garbage collected
+    private FileObserver observer; 
+    
+    /**
+     * This method initiates an intent to for recording a video
+     * and storing it at a specific location. 
+     */
+	private void recordVideoIntent() {
 	    videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-	    videoUri = getOutputMediaFileUri(); // create a file to save the video
+	    
+	    //creates a file to save the video and returns its uri
+	    videoUri = getOutputMediaFileUri();
 	    videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
+	    Log.i("DASH", "VideoUri:" + videoUri.getPath());
+	    
 	    if (videoIntent.resolveActivity(getPackageManager()) != null) {
 	        startActivityForResult(videoIntent, REQUEST_VIDEO_CAPTURE);
 	    }
+	    
+	    String videoPath = ExternalStorageDir.getPath() + "/" + DIR_NAME + "/video";
+	    
+	    //Keeps tracks when the video write is complete so as to segment it
+	    observer = new FileObserver(videoPath) { 
+	        @Override
+	        public void onEvent(int event, String path) {
+	        	Log.i("DASH", "Event captured. Code:" + event + " and the path is "+path);
+	        	if (event == FileObserver.CLOSE_WRITE) {
+	        		Log.i("DASH", "File created"  );
+	        		this.stopWatching();
+	        		segmentVideo();
+	        	}
+	        }
+	    };
+	    observer.startWatching();
 }	
 
+	/**
+	 * Convenience function to get the location where the segments
+	 * have to be saved.
+	 * @param innerFolderName Name of folder that we need to create 
+	 * in segment folder
+	 * @return Location in form of String where segments have to be 
+	 * saved  
+	 */
     private String getSegmentFolder(String innerFolderName) {
     	String folderName = DIR_NAME + "/segments/" + innerFolderName;
-    	
-//    	File segmentFolder = new File(Environment.getExternalStorageDirectory(), folderName);
     	File segmentFolder = new File(ExternalStorageDir, folderName);
 		segmentFolder.mkdirs();
 		
@@ -50,33 +83,32 @@ public class MainActivity extends Activity {
      * recording.
      * @return Uri where the recording is to be saved
      */
+	@SuppressLint("SimpleDateFormat")
 	private Uri getOutputMediaFileUri() {
 		String folderName = DIR_NAME + "/video/" ;
 		fileName = "DASH_Video_" + new SimpleDateFormat("dd_MM_yyyy_hh_mm_ss").format(new Date());
 		String fileNameWithExt = fileName + ".mp4";
 		
-//		File videoFolder = new File(Environment.getExternalStorageDirectory(), folderName);
 		File videoFolder = new File(ExternalStorageDir, folderName);
 		videoFolder.mkdirs();
-
-		// Delete all previous files in video folder
-		//for (File tmp : videoFolder.listFiles())
-		//	  tmp.delete();
 
 		File video = new File(videoFolder, fileNameWithExt);
 		Uri uriSavedImage = Uri.fromFile(video);
 		return uriSavedImage;
 	}
 	
+	/**
+	 * Makes a call to video segmentation in the form of 
+	 * asynchronous task.
+	 */
 	private void segmentVideo() {
-		 //Segment the video in splits of 10 seconds   
+		//Segment the video in splits of 10 seconds 
+		Log.i("DASH","Inside segmentVideo()");
         outputPath = getSegmentFolder(fileName);
-        Log.i("DASH", "Output path = " + outputPath);
+        Log.i("DASH", "Path where segments have to be saved is " + outputPath);
         
         SplitVideo obj = new SplitVideo();
-        String splitDuration = "10.0";
-        
-        obj.execute(videoUri.getPath(), outputPath, splitDuration );
+        obj.execute(videoUri.getPath(), outputPath, "10.0");
 	}
 	
 	private void uploadVideo()
@@ -99,16 +131,7 @@ public class MainActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				dispatchTakeVideoIntent();
-			}
-		});
-        
-        Button b2 = (Button) findViewById(R.id.segmentButton);
-        b2.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				segmentVideo();
+				recordVideoIntent();
 			}
 		});
         
