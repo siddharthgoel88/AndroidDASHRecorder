@@ -19,6 +19,7 @@ public class MainActivity extends Activity {
 	//Hard coding the external storage directory due to some path issue.
 	private static final File ExternalStorageDir = new File("/storage/sdcard0/");
 	private static final String DIR_NAME = "DASHRecorder";
+	private static final String SERVER_URI = "http://pilatus.d1.comp.nus.edu.sg/~a0040609/video.php";
     static final int REQUEST_VIDEO_CAPTURE = 1;
     private String fileName;
     private Uri videoUri;
@@ -73,12 +74,19 @@ public class MainActivity extends Activity {
         Log.i("DASH", "Output path = " + outputPath);
         
         SplitVideo obj = new SplitVideo();
-        Log.i("DASH", "Checking");
         String splitDuration = "10.0";
         
-        Log.i("DASH", "Checking 2");
-        
         obj.execute(videoUri.getPath(), outputPath, splitDuration );
+	}
+	
+	private void uploadVideo()
+	{
+		Log.d("DASH", "Entering uploadVideo");
+		UploadVideoToServer uploadToServer = new UploadVideoToServer();
+		
+		Log.d("DASH", "Calling upload function");
+		uploadToServer.execute(outputPath, SERVER_URI);
+		
 	}
 
 	@Override
@@ -101,6 +109,16 @@ public class MainActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				segmentVideo();
+			}
+		});
+        
+        Button upload = (Button) findViewById(R.id.uploadButton);
+        upload.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) 
+			{
+				uploadVideo();
 			}
 		});
     }

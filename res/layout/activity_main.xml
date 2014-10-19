@@ -11,15 +11,6 @@
         android:text="@string/hello_world" /> -->
 
     <Button
-        android:id="@+id/recordButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="174dp"
-        android:text="@string/record_button_name" />
-
-    <Button
         android:id="@+id/segmentButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -27,5 +18,24 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="62dp"
         android:text="@string/segment_button_name" />
+
+    <Button
+        android:id="@+id/recordButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/segmentButton"
+        android:layout_marginTop="70dp"
+        android:text="@string/record_button_name" />
+
+    <Button
+        android:id="@+id/uploadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/recordButton"
+        android:layout_alignRight="@+id/segmentButton"
+        android:layout_below="@+id/segmentButton"
+        android:layout_marginTop="49dp"
+        android:text="@string/upload_button_name" />
  
 </RelativeLayout>
