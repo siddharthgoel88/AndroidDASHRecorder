@@ -1,6 +1,5 @@
 package com.cs5248.androiddashrecorder;
 
-import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ProgressBar;
@@ -208,7 +207,7 @@ public class SplitVideo extends AsyncTask<String, Double, Integer> {
     @Override
     protected void onProgressUpdate(Double... values) { 	
     	segmentProgress.setProgress(values[0].intValue());
-    	textview.setText(segmentNumber - 1 + " segments uploaded");
+    	textview.setText(segmentNumber - 1 + " segments created");
     }
 
 	@Override

@@ -25,13 +25,38 @@ import ch.boye.httpclientandroidlib.impl.client.HttpClientBuilder;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 
-public class UploadVideoToServer extends AsyncTask<String, String, Void> 
+public class UploadVideoToServer extends AsyncTask<String, Integer, Void>
 {
+	private int numberOfSegments;
+	private int numberOfSegmentsUploaded;
+	private ProgressBar uploadProgress;
+	private TextView textView;
+	
+	public UploadVideoToServer(ProgressBar uploadProgress, TextView textView) {
+		this.uploadProgress = uploadProgress;
+		this.textView = textView;
+	}
+	
+	@Override
+    protected void onPreExecute() {
+    	uploadProgress.setMax(100);
+    	textView.setText("Started to upload segments ...");
+    }
+	
+	@Override
+    protected void onProgressUpdate(Integer... values) { 	
+    	uploadProgress.setProgress(values[0]);
+    	textView.setText(numberOfSegmentsUploaded  + " segments uploaded");
+    }
+	
 	public void uploadFilesFromLocation(String filesLocation, String serverUri)
 	{
 		File[] files = new File(filesLocation).listFiles();
+		numberOfSegments = files.length;
 		HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpPost postRequest = new HttpPost(serverUri);
 		
@@ -72,6 +97,9 @@ public class UploadVideoToServer extends AsyncTask<String, String, Void>
 			{
 				Log.i("DASH" , "Damn "+ e.getMessage());
 			}
+			
+			numberOfSegmentsUploaded = i+1;
+			publishProgress((numberOfSegmentsUploaded * 100) / numberOfSegments);
 		}		
 	}
 

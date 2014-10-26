@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
 	private void uploadVideo()
 	{
 		Log.d("DASH", "Entering uploadVideo");
-		UploadVideoToServer uploadToServer = new UploadVideoToServer();
+		UploadVideoToServer uploadToServer = new UploadVideoToServer(uploadProgressBar, uploadProgressView);
 		
 		Log.d("DASH", "Calling upload function");
 		uploadToServer.execute(outputPath, SERVER_URI);
