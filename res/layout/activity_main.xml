@@ -5,21 +5,58 @@
     tools:context="${relativePackage}.${activityClass}" >
 
     <Button
-        android:id="@+id/uploadButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/recordButton"
-        android:layout_below="@+id/recordButton"
-        android:layout_marginTop="133dp"
-        android:text="@string/upload_button_name" />
-
-    <Button
         android:id="@+id/recordButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="63dp"
+        android:layout_marginTop="34dp"
         android:text="@string/record_button_name" />
- 
+
+    <ProgressBar
+        android:id="@+id/progress_horizontal"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="200dip"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/recordButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:max="100" />
+
+    <TextView
+        android:id="@+id/segmentText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/recordButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="14dp"
+        android:text="@string/segment_progress" />
+
+    <Button
+        android:id="@+id/uploadButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/recordButton"
+        android:layout_below="@+id/progress_horizontal"
+        android:layout_marginTop="186dp"
+        android:text="@string/upload_button_name" />
+
+    <TextView
+        android:id="@+id/uploadText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/uploadButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="@string/upload_progress" />
+
+    <ProgressBar
+        android:id="@+id/ProgressBar01"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="200dip"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/uploadText"
+        android:layout_centerHorizontal="true"
+        android:max="100" />
+
 </RelativeLayout>

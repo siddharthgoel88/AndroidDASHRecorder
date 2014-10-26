@@ -57,7 +57,7 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
     		e.printStackTrace();
 		}
         long start2 = System.currentTimeMillis();
-        Log.i("DASH", "Total time taken to create " + Integer.toString( segmentNumber - 1) + 
+        Log.d("DASH", "Total time taken to create " + Integer.toString( segmentNumber - 1) + 
         		" segments: " + Long.toString( start2 - start1) + "ms" );
     	
     	return segmentNumber - 1;
@@ -130,18 +130,18 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
             }
             movie.addTrack(new CroppedTrack(track, startSample1, endSample1));
         }
-        //long start1 = System.currentTimeMillis();
+        long start1 = System.currentTimeMillis();
         Container out = new DefaultMp4Builder().build(movie);
-        //long start2 = System.currentTimeMillis();
+        long start2 = System.currentTimeMillis();
         FileOutputStream fos = new FileOutputStream(outputPath + String.format("%s---%d.mp4", filename  , segmentNumber));
         FileChannel fc = fos.getChannel();
         out.writeContainer(fc);
 
         fc.close();
         fos.close();
-        //long start3 = System.currentTimeMillis();
-        //Log.i("DASH", "Building IsoFile took : " + (start2 - start1) + "ms");
-        //Log.i("DASH", "Writing IsoFile took  : " + (start3 - start2) + "ms");
+        long start3 = System.currentTimeMillis();
+        Log.d("DASH", "Building IsoFile took : " + (start2 - start1) + "ms");
+        Log.d("DASH", "Writing IsoFile took  : " + (start3 - start2) + "ms");
         return true;
 	}
 
@@ -177,7 +177,7 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
 	@Override
 	protected Integer doInBackground(String... params) {
 		
-		Log.i("DASH" , "Inside doInBackground");
+		Log.d("DASH" , "Inside doInBackground");
 		
 		if (params.length != 3)
 			throw new IllegalArgumentException("Three parameters needed - src" +

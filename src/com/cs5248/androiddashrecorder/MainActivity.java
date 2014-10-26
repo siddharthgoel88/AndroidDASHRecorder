@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
 	//Hard coding the external storage directory due to some path issue.
 	private static final File ExternalStorageDir = new File("/storage/sdcard0/");
 	private static final String DIR_NAME = "DASHRecorder";
-	private static final String SERVER_URI = "http://pilatus.d1.comp.nus.edu.sg/~a0040609/video.php";
+	private static final String SERVER_URI = "http://pilatus.d1.comp.nus.edu.sg/~a0110280/upload.php";
     static final int REQUEST_VIDEO_CAPTURE = 1;
     private String fileName;
     private Uri videoUri;
@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
      */
 	private void recordVideoIntent() {
 	    videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-	    
+
 	    //creates a file to save the video and returns its uri
 	    videoUri = getOutputMediaFileUri();
 	    videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
@@ -102,13 +102,13 @@ public class MainActivity extends Activity {
 	 * asynchronous task.
 	 */
 	private void segmentVideo() {
-		//Segment the video in splits of 10 seconds 
+		//Segment the video in splits of 3 seconds 
 		Log.i("DASH","Inside segmentVideo()");
         outputPath = getSegmentFolder(fileName);
         Log.i("DASH", "Path where segments have to be saved is " + outputPath);
         
         SplitVideo obj = new SplitVideo();
-        obj.execute(videoUri.getPath(), outputPath, "10.0");
+        obj.execute(videoUri.getPath(), outputPath, "3.0");
 	}
 	
 	private void uploadVideo()
