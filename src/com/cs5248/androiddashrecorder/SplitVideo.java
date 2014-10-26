@@ -1,7 +1,10 @@
 package com.cs5248.androiddashrecorder;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.coremedia.iso.boxes.Container;
 import com.googlecode.mp4parser.authoring.Movie;
@@ -24,11 +27,28 @@ import java.util.List;
  * This code is an adaption of ShortenExample.java
  * from examples of MP4Parser. 
  */
-public class SplitVideo extends AsyncTask<String, String, Integer> {
+public class SplitVideo extends AsyncTask<String, Double, Integer> {
 	
-	private static String videoPath;
-	private static String outputPath;
-	private static String filename;
+	private String videoPath;
+	private String outputPath;
+	private String filename;
+	private boolean set;
+	private double videoTime;
+	private double percentage;
+	private int segmentNumber;
+	
+	private  ProgressBar segmentProgress;
+    private  TextView textview;
+    
+    public SplitVideo(ProgressBar segmentProgress, TextView textView) {
+    	this.segmentProgress = segmentProgress;
+    	this.textview = textView;
+    }
+    
+    @Override
+    protected void onPreExecute() {
+    	segmentProgress.setMax(100);
+    }
     
     /**
      * Splits a video into multiple clips of specified duration of seconds
@@ -38,9 +58,12 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
      * @param splitDuration Duration of each clip into which we have to cut
      * @return Number of segments created in splitting of video
      */
-    public static int split(String path, String destinationPath, double splitDuration) {
+    public int split(String path, String destinationPath, double splitDuration) {
     	double startTime = 0.01;
-    	int segmentNumber = 1;
+    	segmentNumber = 1;
+    	
+    	videoTime = 0.0;
+    	set = false;
     	videoPath = path;
     	outputPath = destinationPath;	
     	filename = new File(videoPath).getName().replace(".mp4", "");
@@ -57,7 +80,7 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
     		e.printStackTrace();
 		}
         long start2 = System.currentTimeMillis();
-        Log.d("DASH", "Total time taken to create " + Integer.toString( segmentNumber - 1) + 
+        Log.i("DASH", "Total time taken to create " + Integer.toString( segmentNumber - 1) + 
         		" segments: " + Long.toString( start2 - start1) + "ms" );
     	
     	return segmentNumber - 1;
@@ -74,9 +97,9 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
      * @throws IOException
      * @throws FileNotFoundException
      */
-	private static boolean performSplit(double startTime, double endTime, int segmentNumber) throws IOException, FileNotFoundException {
+	private boolean performSplit(double startTime, double endTime, int segmentNumber) throws IOException, FileNotFoundException {
         Movie movie = MovieCreator.build(videoPath);
-
+        Log.i("DASH", "Movie Time:" +Long.toString(movie.getTimescale()));
         List<Track> tracks = movie.getTracks();
         movie.setTracks(new LinkedList<Track>());
         // remove all tracks we will create new tracks from the old
@@ -98,8 +121,16 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
                 startTime = correctTimeToSyncSample(track, startTime, true);
                 endTime = correctTimeToSyncSample(track, endTime, true);
                 timeCorrected = true;
+            	if(!set) {
+            		videoTime = correctTimeToSyncSample(track, 10000, true);
+            		set = true;
+            		Log.i("DASH", "Video total time =" + videoTime);
+            	}
             }
         }
+        
+        percentage = (startTime * 100) / videoTime;
+        publishProgress(percentage);
         
         if (startTime == endTime) 
         	return false;
@@ -140,12 +171,12 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
         fc.close();
         fos.close();
         long start3 = System.currentTimeMillis();
-        Log.d("DASH", "Building IsoFile took : " + (start2 - start1) + "ms");
-        Log.d("DASH", "Writing IsoFile took  : " + (start3 - start2) + "ms");
+        Log.i("DASH", "Building IsoFile took : " + (start2 - start1) + "ms");
+        Log.i("DASH", "Writing IsoFile took  : " + (start3 - start2) + "ms");
         return true;
 	}
 
-    private static double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
+    private double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
         double[] timeOfSyncSamples = new double[track.getSyncSamples().length];
         long currentSample = 0;
         double currentTime = 0;
@@ -173,11 +204,17 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
         }
         return timeOfSyncSamples[timeOfSyncSamples.length - 1];
     }
+    
+    @Override
+    protected void onProgressUpdate(Double... values) { 	
+    	segmentProgress.setProgress(values[0].intValue());
+    	textview.setText(segmentNumber - 1 + " segments uploaded");
+    }
 
 	@Override
 	protected Integer doInBackground(String... params) {
 		
-		Log.d("DASH" , "Inside doInBackground");
+		Log.i("DASH" , "Inside doInBackground");
 		
 		if (params.length != 3)
 			throw new IllegalArgumentException("Three parameters needed - src" +
@@ -186,7 +223,7 @@ public class SplitVideo extends AsyncTask<String, String, Integer> {
 		String path = params[0];
 		String destPath = params[1];
 		double splitDuration = Double.parseDouble(params[2]);
-		return Integer.valueOf(split(path, destPath, splitDuration));
+		return Integer.valueOf(this.split(path, destPath, splitDuration));
 	}
 
 

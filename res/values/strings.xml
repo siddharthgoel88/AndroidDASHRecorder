@@ -3,6 +3,6 @@
     <string name="app_name">AndroidDASHRecorder</string>
     <string name="record_button_name">Record Video</string>
     <string name="upload_button_name">Upload Video</string>
-    <string name="segment_progress">Segment Progress:</string>
-    <string name="upload_progress">Upload Progress:</string>
+    <string name="segment_progress"></string>
+    <string name="upload_progress"></string>
 </resources>

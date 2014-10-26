@@ -14,6 +14,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 	
@@ -26,6 +28,10 @@ public class MainActivity extends Activity {
     private Uri videoUri;
     private String outputPath;
     private Intent videoIntent;
+    private ProgressBar segmentProgressBar;
+    private ProgressBar uploadProgressBar;
+    private TextView segmentProgressView;
+    private TextView uploadProgressView;
     //Keeping FileObserver global else it will be garbage collected
     private FileObserver observer; 
     
@@ -51,7 +57,7 @@ public class MainActivity extends Activity {
 	    observer = new FileObserver(videoPath) { 
 	        @Override
 	        public void onEvent(int event, String path) {
-	        	Log.i("DASH", "Event captured. Code:" + event + " and the path is "+path);
+	        	//Log.i("DASH", "Event captured. Code:" + event + " and the path is "+path);
 	        	if (event == FileObserver.CLOSE_WRITE) {
 	        		Log.i("DASH", "File created"  );
 	        		this.stopWatching();
@@ -106,8 +112,8 @@ public class MainActivity extends Activity {
 		Log.i("DASH","Inside segmentVideo()");
         outputPath = getSegmentFolder(fileName);
         Log.i("DASH", "Path where segments have to be saved is " + outputPath);
-        
-        SplitVideo obj = new SplitVideo();
+                
+        SplitVideo obj = new SplitVideo(segmentProgressBar, segmentProgressView);
         obj.execute(videoUri.getPath(), outputPath, "3.0");
 	}
 	
@@ -125,6 +131,11 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        
+        segmentProgressBar = (ProgressBar) findViewById(R.id.segmentProgress);
+        segmentProgressView = (TextView) findViewById(R.id.segmentTextView);
+        uploadProgressBar = (ProgressBar) findViewById(R.id.uploadProgress);
+        uploadProgressView = (TextView) findViewById(R.id.uploadTextView);
         
         Button b = (Button) findViewById(R.id.recordButton);
         b.setOnClickListener(new View.OnClickListener() {
