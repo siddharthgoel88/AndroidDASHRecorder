@@ -6,7 +6,7 @@ Description
 
 This is an Android application which has mainly three main functions which are :
 - Record a video in .mp4 format
-- Split it into small segments of about 10 seconds (using MP4Parser)
+- Split it into small segments of about 3 seconds (using MP4Parser)
 - Send those small segments to a server over HTTP Post
 
 Requirements
