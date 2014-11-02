@@ -22,7 +22,9 @@ public class MainActivity extends Activity {
 	//Hard coding the external storage directory due to some path issue.
 	private static final File ExternalStorageDir = new File("/storage/sdcard0/");
 	private static final String DIR_NAME = "DASHRecorder";
-	private static final String SERVER_URI = "http://pilatus.d1.comp.nus.edu.sg/~a0110280/upload.php";
+	private static final String SERVER_URI = "http://pilatus.d1.comp.nus.edu.sg/~a0110280/";
+	private static final String END_UPLOAD_PAGE = "process.php";
+	private static final String UPLOAD_PHP_PAGE = "upload.php";
     static final int REQUEST_VIDEO_CAPTURE = 1;
     private String fileName;
     private Uri videoUri;
@@ -120,10 +122,12 @@ public class MainActivity extends Activity {
 	private void uploadVideo()
 	{
 		Log.d("DASH", "Entering uploadVideo");
-		UploadVideoToServer uploadToServer = new UploadVideoToServer(uploadProgressBar, uploadProgressView);
-		
+
+		UploadVideoToServer uploadToServer = new UploadVideoToServer(outputPath, SERVER_URI, UPLOAD_PHP_PAGE, END_UPLOAD_PAGE, 
+				uploadProgressBar, uploadProgressView);
+
 		Log.d("DASH", "Calling upload function");
-		uploadToServer.execute(outputPath, SERVER_URI);
+		uploadToServer.execute();
 		
 	}
 
@@ -137,8 +141,8 @@ public class MainActivity extends Activity {
         uploadProgressBar = (ProgressBar) findViewById(R.id.uploadProgress);
         uploadProgressView = (TextView) findViewById(R.id.uploadTextView);
         
-        Button b = (Button) findViewById(R.id.recordButton);
-        b.setOnClickListener(new View.OnClickListener() {
+        Button record = (Button) findViewById(R.id.recordButton);
+        record.setOnClickListener(new View.OnClickListener() {
 			
 			@Override
 			public void onClick(View v) {
@@ -155,7 +159,5 @@ public class MainActivity extends Activity {
 				uploadVideo();
 			}
 		});
-    }
-    
-    
+    }    
 }

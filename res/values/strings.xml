@@ -5,4 +5,5 @@
     <string name="upload_button_name">Upload Video</string>
     <string name="segment_progress"></string>
     <string name="upload_progress"></string>
+    <string name="resume_button_name">Resume Upload</string>
 </resources>
