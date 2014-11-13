@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">AndroidDASHRecorder</string>
     <string name="record_button_name">Record Video</string>
     <string name="upload_button_name">Upload Video</string>
     <string name="segment_progress"></string>
     <string name="upload_progress"></string>
     <string name="resume_button_name">Resume Upload</string>
+    <string name="title_activity_record_video">RecordVideo</string>
+    <string name="hello_world">Hello world!</string>
+
 </resources>

@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.FileObserver;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -42,16 +41,22 @@ public class MainActivity extends Activity {
      * and storing it at a specific location. 
      */
 	private void recordVideoIntent() {
-	    videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-
+		
+	    //videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+		videoIntent = new Intent(MainActivity.this, RecordVideo.class);
+		
 	    //creates a file to save the video and returns its uri
 	    videoUri = getOutputMediaFileUri();
-	    videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
+	    //videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
+	    videoIntent.putExtra("videopath", videoUri.getPath());
 	    Log.i("DASH", "VideoUri:" + videoUri.getPath());
 	    
+	    startActivity(videoIntent);
+	    /*
 	    if (videoIntent.resolveActivity(getPackageManager()) != null) {
 	        startActivityForResult(videoIntent, REQUEST_VIDEO_CAPTURE);
 	    }
+	    */
 	    
 	    String videoPath = ExternalStorageDir.getPath() + "/" + DIR_NAME + "/video";
 	    
