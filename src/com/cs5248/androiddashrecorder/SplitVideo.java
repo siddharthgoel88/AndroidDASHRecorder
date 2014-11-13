@@ -58,7 +58,7 @@ public class SplitVideo extends AsyncTask<String, Double, Integer> {
      * @return Number of segments created in splitting of video
      */
     public int split(String path, String destinationPath, double splitDuration) {
-    	double startTime = 0.01;
+    	double startTime = 0.00;
     	segmentNumber = 1;
     	
     	videoTime = 0.0;
@@ -138,7 +138,7 @@ public class SplitVideo extends AsyncTask<String, Double, Integer> {
             long currentSample = 0;
             double currentTime = 0;
             double lastTime = 0;
-            long startSample1 = -1;
+            long startSample1 = 0;
             long endSample1 = -1;
 
             for (int i = 0; i < track.getSampleDurations().length; i++) {
@@ -158,6 +158,7 @@ public class SplitVideo extends AsyncTask<String, Double, Integer> {
                 currentTime += (double) delta / (double) track.getTrackMetaData().getTimescale();
                 currentSample++;
             }
+            Log.i("DASH", "Start time = " + startTime + ", End time = " + endTime);
             movie.addTrack(new CroppedTrack(track, startSample1, endSample1));
         }
         long start1 = System.currentTimeMillis();
@@ -192,7 +193,7 @@ public class SplitVideo extends AsyncTask<String, Double, Integer> {
         }
         double previous = 0;
         for (double timeOfSyncSample : timeOfSyncSamples) {
-            if (timeOfSyncSample > cutHere) {
+            if (timeOfSyncSample >= cutHere) {
                 if (next) {
                     return timeOfSyncSample;
                 } else {
