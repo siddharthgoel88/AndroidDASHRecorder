@@ -19,7 +19,9 @@ import android.util.Log;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-
+/**
+ * Uploads the segmented video to the server 
+ */
 public class UploadVideoToServer extends AsyncTask<Void, Integer, Void>
 {
 	private int numberOfSegments;
@@ -60,7 +62,11 @@ public class UploadVideoToServer extends AsyncTask<Void, Integer, Void>
 	    	textView.setText(numberOfSegmentsUploaded  + " segments uploaded");
 		}
 	}
-	
+
+	// The main helper function which picks up the files from a given location
+	// and uploads them to the server by making a post call to upload.php
+	// After finishing all the uploads, makes the call to process.php to indicate
+	// that all the segments have been uploaded
 	public void uploadFilesFromLocation()
 	{
 		File[] files = new File(filesLocation).listFiles();
@@ -71,7 +77,7 @@ public class UploadVideoToServer extends AsyncTask<Void, Integer, Void>
 		
 		String folderName = files[0].getName().substring(0, files[0].getName().indexOf("---1.mp4"));
 		
-		Log.i("DASH", "Entering the for loop");
+		Log.i("DASH", "Entering the for loop for video uploads");
 		for (int i=numberOfSegmentsUploaded;i<=files.length;i++)
 		{
 			MultipartEntityBuilder reqEntity = MultipartEntityBuilder.create();
@@ -118,6 +124,7 @@ public class UploadVideoToServer extends AsyncTask<Void, Integer, Void>
 			}
 			catch(Exception e)
 			{
+				// If the upload has failed, the thread sleeps for a while and tries again
 				Log.i("DASH" , "Exception raised while trying to upload the video"+ e.getMessage());
 				publishProgress(-1);
 				i--;
