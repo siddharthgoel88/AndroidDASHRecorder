@@ -57,6 +57,9 @@ public class RecordVideo extends Activity implements SurfaceHolder.Callback{
 		});
 	}
 	
+	/**
+	 * Convenience method to start recording
+	 */
 	private void startRecoding() {
 		Log.d(TAG, "Started recording");
 		
@@ -70,7 +73,10 @@ public class RecordVideo extends Activity implements SurfaceHolder.Callback{
 			Log.d(TAG, "Oh God!!! Some exception " + e.getMessage());
 		}
 	}
-
+	
+	/**
+	 * Convenience method to stop recording
+	 */
 	private void stopRecording() {
 		Log.d(TAG, "Stopping recording");
 		
@@ -80,7 +86,10 @@ public class RecordVideo extends Activity implements SurfaceHolder.Callback{
 		isRecording = false;
 		dispose();
 	}
-
+	
+	/**
+	 * Releasing all the resources acquired for recording.
+	 */
 	private void dispose() {
 		Log.d(TAG, "Performing dispose of various resources");
 		if (mediaRecorder != null) {
@@ -94,6 +103,9 @@ public class RecordVideo extends Activity implements SurfaceHolder.Callback{
 		finish();
 	}
 
+	/**
+	 * Callback of Android Surface
+	 */
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(TAG, "Surface created");
@@ -104,6 +116,11 @@ public class RecordVideo extends Activity implements SurfaceHolder.Callback{
 			finish();
 		}
 		try {
+			/*
+			 * Setting all the parameters necessary for
+			 * MediaRecorder to record a video of 720x480
+			 * resolution and 3Mbps bitrate. 
+			 */
 			mediaRecorder.setCamera(camera);
 			mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 			mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
@@ -123,6 +140,9 @@ public class RecordVideo extends Activity implements SurfaceHolder.Callback{
 		}
 	}
 
+	/**
+	 * Callback of Android Surface
+	 */
 	@Override
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
@@ -138,12 +158,18 @@ public class RecordVideo extends Activity implements SurfaceHolder.Callback{
 		}
 	}
 
+	/**
+	 * Callback of Android Surface
+	 */
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.d(TAG, "Surface Destroyed");
 		stopRecording();
 	}
 	
+	/**
+	 * Handling the functionality when back button is pressed.
+	 */
 	@Override
 	public void onBackPressed() {
 		Log.d(TAG, "Back button pressed. Stopping recording and existing!!");

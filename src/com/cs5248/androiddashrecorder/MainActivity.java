@@ -42,29 +42,21 @@ public class MainActivity extends Activity {
      */
 	private void recordVideoIntent() {
 		
-	    //videoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
 		videoIntent = new Intent(MainActivity.this, RecordVideo.class);
 		
 	    //creates a file to save the video and returns its uri
 	    videoUri = getOutputMediaFileUri();
-	    //videoIntent.putExtra(MediaStore.EXTRA_OUTPUT, videoUri);
 	    videoIntent.putExtra("videopath", videoUri.getPath());
 	    Log.i("DASH", "VideoUri:" + videoUri.getPath());
 	    
 	    startActivity(videoIntent);
-	    /*
-	    if (videoIntent.resolveActivity(getPackageManager()) != null) {
-	        startActivityForResult(videoIntent, REQUEST_VIDEO_CAPTURE);
-	    }
-	    */
-	    
+
 	    String videoPath = ExternalStorageDir.getPath() + "/" + DIR_NAME + "/video";
 	    
 	    //Keeps tracks when the video write is complete so as to segment it
 	    observer = new FileObserver(videoPath) { 
 	        @Override
 	        public void onEvent(int event, String path) {
-	        	//Log.i("DASH", "Event captured. Code:" + event + " and the path is "+path);
 	        	if (event == FileObserver.CLOSE_WRITE) {
 	        		Log.i("DASH", "File created"  );
 	        		this.stopWatching();
@@ -124,6 +116,9 @@ public class MainActivity extends Activity {
         obj.execute(videoUri.getPath(), outputPath, "3.0");
 	}
 	
+	/**
+	 * Convenience method for uploading the segments to the server 
+	 */
 	private void uploadVideo()
 	{
 		Log.d("DASH", "Entering uploadVideo");

@@ -175,7 +175,16 @@ public class SplitVideo extends AsyncTask<String, Double, Integer> {
         Log.i("DASH", "Writing IsoFile took  : " + (start3 - start2) + "ms");
         return true;
 	}
-
+	
+	/**
+	 * Convenience method which gives the nearest next or previous time
+	 * where the segmentation of the video can be performed.
+	 * 
+	 * @param track Track which needs to be scanned to find the next sync sample
+	 * @param cutHere Time at which the segmentation needs to be done
+	 * @param next boolean false if want the cutTime less than cutHere else true
+	 * @return nearest cutTime where the segmentation could be done
+	 */
     private double correctTimeToSyncSample(Track track, double cutHere, boolean next) {
         double[] timeOfSyncSamples = new double[track.getSyncSamples().length];
         long currentSample = 0;
@@ -208,6 +217,7 @@ public class SplitVideo extends AsyncTask<String, Double, Integer> {
     @Override
     protected void onProgressUpdate(Double... values) { 	
     	segmentProgress.setProgress(values[0].intValue());
+    	//Updates the number of segments done below Progress Bar on UI
     	textview.setText(segmentNumber - 1 + " segments created");
     }
 
